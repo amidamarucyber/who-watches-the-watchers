@@ -2,7 +2,7 @@
 
 **An OSINT investigation into how the U.S. government purchases warrantless surveillance through commercial data brokers**
 
-*February 2026 | All sources public and reproducible*
+*February–March 2026 | All sources public and reproducible*
 
 ---
 
@@ -40,6 +40,15 @@ Reveal Technology's Chronos military C2 platform (`chronos.dev.revealtech.ai`) s
 ### USSOCOM biometrics client identity leaked in a public file
 A publicly readable PWA manifest at `ecav.dev.revealtech.ai` contains: `"id": "com.socom.ecav"` and `"description": "An automated Electronic Biometrics Transmission Specification (EBTS) compliance verification tool in support of USSOCOM."` A military biometrics platform with its Special Operations Command client identity in a forgotten config file.
 
+### Facial recognition and license plate readers share the same backend — undisclosed
+DNS monitoring detected that **Clearview AI** (facial recognition, 70B+ images) and **Flock Safety** (license plate readers, 20B+ scans/month) resolve to the **same three AWS EC2 instances** in us-east-2 (Ohio). No HTTP content, no TLS certificates — backend services not meant for public access. A facial recognition company and an ALPR company sharing backend infrastructure has not been previously reported. Their data types are complementary: **identify people by face, track their vehicles**. No disclosure exists.
+
+### Cellebrite building AI inference pipeline and secret vault cluster
+CT log monitoring detected **199 new Cellebrite subdomains in a single day**. DNS resolution revealed a **HashiCorp Vault** secrets management cluster on F5 Distributed Cloud with exposed monitoring endpoints. Domains `inference.cellebrite.com` and `enrichment.cellebrite.com` with full dev/qa/staging pipelines indicate **AI/ML inference capabilities under active development**. Additionally, `ice.cellebrite.com` resolves to a **Verizon Business static IP** — an on-premises deployment, not cloud-hosted.
+
+### Identity verification company building AI agent integration — automated KYC without humans
+Persona (identity verification for Coinbase, OpenAI, and others) is building a **Model Context Protocol (MCP) server** at `mcp.withpersona.com` — a standard for letting LLM agents interact with external tools. Additional endpoints `copilot.withpersona.com` (authenticated AI copilot) and `ask-ai.withpersona.com` (IP-restricted) confirm AI integration across the platform. MCP would allow **AI agents to programmatically perform identity verification** — automating KYC/AML checks that currently require human review. Combined with Persona's existing OpenAI integration screening millions of users monthly, this positions automated identity verification as an **AI-to-AI capability with no human in the loop**.
+
 ### Your retirement fund probably finances surveillance
 **9,855+ NPORT-P fund filings** show mainstream pension and retirement funds holding debt from prison telecom and surveillance companies: GTL (4,939 filings), Securus (3,065), Aventiv (1,748), Sandvine/internet censorship (444), Dataminr (379), NSO Group/Pegasus spyware (13). NSO Group debt trades at **3.5 cents on the dollar** with interest in arrears.
 
@@ -64,10 +73,11 @@ Three rounds of passive recon found **125+ security exposures** across 7+ compan
 | FOIA documents analyzed | **11** from Brennan Center v. DHS |
 | Internal corporate documents recovered | **19** including confidential surveillance manual |
 | Live security exposures confirmed | **125+** across 7+ companies |
-| Subdomains mapped | **2,500+** of surveillance infrastructure |
+| Subdomains mapped | **3,000+** of surveillance infrastructure |
+| New subdomains detected (March 2026) | **559** across active deployments |
 | Court opinions surveyed | **1,370+** facial recognition, **41** geofence warrant |
 | Fund filings holding surveillance/prison debt | **9,855+** NPORT-P filings |
-| Investigative leads generated | **1,147** |
+| Investigative leads generated | **1,440+** |
 
 ## The Top Contractors
 
@@ -89,7 +99,7 @@ But federal contracts are the **visible fraction**. Flock Safety ($7.5B valuatio
 
 ```
 report/
-  full-report.md              # Complete investigation — 9,874 lines, all sources cited
+  full-report.md              # Complete investigation — 10,300+ lines, all sources cited
   executive-summary.md        # Key findings with evidence
 
 foia/
@@ -102,7 +112,7 @@ Every finding comes from legally obtained public sources:
 
 - **USAspending.gov** — Federal contract data via REST API
 - **SEC EDGAR** — 40+ annual filings (10-K/20-F/40-F), NPORT-P fund holdings, Schedule 13G/13D, Form 4, Form D
-- **Certificate Transparency logs** — crt.sh API, 2,500+ subdomains
+- **Certificate Transparency logs** — crt.sh API, 3,000+ subdomains (with ongoing monitoring)
 - **FOIA documents** — Brennan Center v. DHS litigation
 - **Court records** — CourtListener API, 1,370+ opinions
 - **Wayback Machine** — Internet Archive CDX API, 19 recovered corporate documents
@@ -116,11 +126,11 @@ Every finding comes from legally obtained public sources:
 
 ## How to Use This Research
 
-- **Journalists**: Every claim is sourced. The investigative leads section contains 1,147 items for follow-up.
+- **Journalists**: Every claim is sourced. The investigative leads section contains 1,440+ items for follow-up.
 - **Researchers**: The methodology is fully documented and reproducible.
 - **Legislators**: The recommendations section identifies specific policy gaps.
 - **Lawyers**: The court docket analysis covers 1,370+ facial recognition opinions and 41 geofence warrant opinions.
-- **The public**: The executive summary provides an accessible overview of all 16 key findings.
+- **The public**: The executive summary provides an accessible overview of all 19 key findings.
 
 ## Legal
 
