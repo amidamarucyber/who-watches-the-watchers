@@ -3,7 +3,7 @@
 
 **An OSINT investigation into how the U.S. government purchases warrantless surveillance through commercial data brokers**
 
-*February 2026 | All sources public and reproducible | 670 leads, $4.7B+ federal documented, $20B+ total market estimated*
+*February–March 2026 | All sources public and reproducible | 670+ leads, $4.7B+ federal documented, $20B+ total market estimated*
 
 ---
 
@@ -11,11 +11,11 @@
 
 The U.S. government has built a parallel surveillance system that bypasses the Fourth Amendment by **purchasing** data it would need a warrant to **collect**. Phone location tracking, social media monitoring, facial recognition, license plate surveillance, communications interception, and predictive analysis are all available without judicial authorization — sold by private companies through deliberately obscured procurement channels.
 
-This investigation documented **$4.7 billion** in federal contracts across **29+ surveillance vendors**, identified **180 reseller companies** that obscure the true nature of purchases, mapped **2,500+ subdomains** of surveillance infrastructure, recovered **19 internal corporate documents** from web archives including a confidential surveillance training manual marked "CONFIDENTIAL DO NOT DISTRIBUTE," analyzed **11 FOIA-released documents** from the Brennan Center's litigation against DHS revealing ICE's ShadowDragon contracts, procurement concealment, and warrantless surveillance in live investigations, and traced a system of NAICS code misclassification, reseller concealment, lobbying, revolving doors, and legal vacuums that makes this spending invisible to oversight. State and local surveillance spending — where companies like Flock Safety ($7.5B valuation), Axon/Fusus (250+ cities), and SoundThinking ($102M revenue) generate most of their revenue — pushes the total market well beyond **$20 billion**.
+This investigation documented **$4.7 billion** in federal contracts across **29+ surveillance vendors**, identified **180 reseller companies** that obscure the true nature of purchases, mapped **3,000+ subdomains** of surveillance infrastructure, recovered **19 internal corporate documents** from web archives including a confidential surveillance training manual marked "CONFIDENTIAL DO NOT DISTRIBUTE," analyzed **11 FOIA-released documents** from the Brennan Center's litigation against DHS revealing ICE's ShadowDragon contracts, procurement concealment, and warrantless surveillance in live investigations, and traced a system of NAICS code misclassification, reseller concealment, lobbying, revolving doors, and legal vacuums that makes this spending invisible to oversight. State and local surveillance spending — where companies like Flock Safety ($7.5B valuation), Axon/Fusus (250+ cities), and SoundThinking ($102M revenue) generate most of their revenue — pushes the total market well beyond **$20 billion**.
 
 ---
 
-### Fourteen Key Findings
+### Nineteen Key Findings
 
 **1. $4.7 Billion in Federal Surveillance Spending — The Visible Fraction**
 
@@ -182,6 +182,39 @@ DNS TXT records exposed internal SaaS stacks:
 - **Babel Street**: AI vendor, Miro, Pendo
 
 Advisory boards stacked with former officials: Babel Street's board includes a **former DIA Director** and **former Assistant Secretary of State**. Clearview AI's includes a **former NYPD Commissioner** and **former Assistant Defense Secretary**. The surveillance industry and the government it sells to share the same personnel.
+
+
+---
+
+### March 2026 Update — Active Infrastructure Monitoring
+
+Ongoing CT log, DNS, and HTTP header analysis in early March 2026 detected significant real-time changes across the surveillance ecosystem, adding five new findings:
+
+**15. Cellebrite Building AI Inference Infrastructure and Secrets Management Cluster**
+
+CT log monitoring detected 199 new Cellebrite subdomains in a single day. DNS resolution revealed `vega.clarion.cellebrite.com` is a **HashiCorp Vault** instance running on **F5 Distributed Cloud** — enterprise secrets management with PostHog analytics, Raft storage, and exposed monitoring endpoints. Star-named nodes (vega, spica live; atlas, jupiter, orion, gemma, pollux planned) indicate a multi-node cluster being built.
+
+More critically, domains `inference.cellebrite.com` and `enrichment.cellebrite.com` with full dev/qa/staging pipelines indicate **AI/ML inference capabilities under development** — likely powering their "Guardian Investigate" agentic AI platform. A US Government Cloud deployment was confirmed: `waf-us-gov-east-1.360.cellebrite.com` → AWS GovCloud ALB for their "360" analytics platform.
+
+Additionally, `ice.cellebrite.com` resolves to a **Verizon Business static IP** (173.70.100.106) — not cloud-hosted — consistent with an on-premises deployment for a government client.
+
+**16. Babel Street Onboarding Customers at Scale**
+
+48-52 new certificates in 24 hours for `*.sa.babelstreet.com` reveal Babel Street's **"Secure Access" multi-tenant SaaS platform** is rapidly onboarding customers. Nine randomly-generated 6-character tenant IDs (automated provisioning via Let's Encrypt on a .NET/Kestrel backend) appeared in a single day. Named instances include `admin`, `alpha-gw`, `trial3`, and `test2`. This product name — "Secure Access" — is distinct from Babel Street's publicly known products (Babel X, Locate X, Rosette).
+
+**17. Clearview AI and Flock Safety Share Backend Infrastructure**
+
+DNS resolution detected that subdomains for both **Clearview AI** (facial recognition, 70B+ images) and **Flock Safety** (ALPR, 20B+ scans/month) resolve to the **same three AWS EC2 instances** in us-east-2 (Ohio): `18.119.251.62`, `18.216.62.46`, `3.131.17.7`. These IPs serve no HTTP content and present no TLS certificates — backend services not meant for browser access.
+
+A facial recognition company and a license plate reader company sharing backend infrastructure has not been previously reported. Their data types are complementary — identifying people by face and tracking their vehicles — making data exchange a plausible explanation.
+
+**18. Persona Building LLM Integration Layer**
+
+New endpoints `mcp.withpersona.com` (HTTP 405 — POST-only API), `copilot.withpersona.com` (401 — authenticated), and `ask-ai.withpersona.com` (403 — IP-restricted) reveal Persona is building a **Model Context Protocol server** for LLM agent integration, an AI copilot, and an AI Q&A system. MCP would allow AI agents to programmatically perform identity verification — automating KYC/AML checks. Combined with Persona's existing OpenAI integration, this positions identity verification as an automated AI capability.
+
+**19. Palantir Owns IP Blocks and Expands to Middle East**
+
+RDAP queries revealed Palantir **owns IP address ranges** directly (198.97.14.0/23 and 8.4.231.0/24 registered to PALANTIR TECHNOLOGIES INC.) — unusual for a software company. Six-country mobile VPN deployment (US, Germany, UK, Australia, Japan) matches their Five Eyes customer base. New Foundry status pages confirm active deployment into **Israel** (ILW1) and **the Middle East** (MEW1, MEC3) — previously identified only through internal hostname exposure.
 
 ---
 

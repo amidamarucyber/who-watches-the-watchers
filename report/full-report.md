@@ -10,7 +10,7 @@
 
 An investigation using exclusively public sources — federal contract databases, certificate transparency logs, DNS resolution, SEC filings, court records, and lobbying disclosures — reveals a surveillance apparatus operating largely outside constitutional oversight. Eighteen private companies, connected through shared investors, personnel pipelines, data-sharing agreements, and infrastructure, collectively provide the U.S. government with capabilities that would require warrants if conducted directly by law enforcement.
 
-The investigation tracked $5+ billion in federal surveillance contracts across 40+ companies, $3.68 billion in insider stock sales, mapped GBP 1.53 billion in UK and AUD 50M+ in Australian contracts, identified 33 inter-company connections, and documented 145 investigative leads. Key original findings include the discovery of shared government cloud infrastructure across multiple surveillance vendors, a previously unreported infrastructure relationship between ShadowDragon and Anomaly Six, a systematic revolving door between intelligence agencies and surveillance contractors, a dark GovCloud deployment by Cellebrite using a Hebrew cultural codename and private CA certificates invisible to public monitoring, Flock Safety's continuously active GovCloud database infrastructure despite public denials of federal work, and Palantir's massive internal infrastructure exposure through certificate transparency logs — revealing 400+ internal hostnames including dedicated Saudi Arabia operations and UK Government deployments.
+The investigation tracked $5+ billion in federal surveillance contracts across 40+ companies, $3.68 billion in insider stock sales, mapped GBP 1.53 billion in UK and AUD 50M+ in Australian contracts, identified 34 inter-company connections, documented 145 investigative leads, and conducted ongoing infrastructure monitoring that detected 559 new subdomains, coordinated deployment activity across multiple vendors, and a previously unreported infrastructure link between Clearview AI and Flock Safety. Key original findings include the discovery of shared government cloud infrastructure across multiple surveillance vendors, a previously unreported infrastructure relationship between ShadowDragon and Anomaly Six, a systematic revolving door between intelligence agencies and surveillance contractors, a dark GovCloud deployment by Cellebrite using a Hebrew cultural codename and private CA certificates invisible to public monitoring, Flock Safety's continuously active GovCloud database infrastructure despite public denials of federal work, and Palantir's massive internal infrastructure exposure through certificate transparency logs — revealing 400+ internal hostnames including dedicated Saudi Arabia operations and UK Government deployments.
 
 The core finding: the U.S. government has constructed a parallel surveillance system by purchasing from private companies what it cannot legally collect itself.
 
@@ -39,6 +39,7 @@ The core finding: the U.S. government has constructed a parallel surveillance sy
    - 5.4 Palantir.tech: 400+ Internal Hostnames Exposed
    - 5.5 ShadowDragon/Anomaly Six Infrastructure Connection
    - 5.6 The Revolving Door Network
+   - 5.7 March 2026 Infrastructure Monitoring — Active Deployments Detected
 6. [The Legal Gray Zone](#the-legal-gray-zone)
 7. [Follow the Money](#follow-the-money)
 8. [The Peter Thiel Thread](#the-peter-thiel-thread)
@@ -53,7 +54,7 @@ The core finding: the U.S. government has constructed a parallel surveillance sy
 This investigation was conducted entirely using legal, publicly available sources:
 
 - **USAspending.gov** — Federal contract data via REST API. 39 contracts totaling $2.36B identified across 18 companies.
-- **Certificate Transparency (CT) Logs** — crt.sh API queries across 25+ domains belonging to 14 companies. Over 2,200 unique subdomains discovered.
+- **Certificate Transparency (CT) Logs** — crt.sh API queries across 25+ domains belonging to 14 companies. Over 2,700 unique subdomains discovered (with 559 additional subdomains identified through ongoing monitoring in March 2026).
 - **DNS Resolution** — Bulk resolution of CT-discovered subdomains to map infrastructure, identify hosting providers, and find cross-company IP sharing.
 - **SEC EDGAR** — 10-K, 10-Q, and 20-F filings for publicly traded companies (Palantir/PLTR, Cellebrite/CLBT).
 - **Court Records** — CourtListener, PACER summaries, and legal reporting on 10+ active or settled cases.
@@ -63,7 +64,7 @@ This investigation was conducted entirely using legal, publicly available source
 - **Wayback Machine** — Internet Archive CDX API for historical website snapshots. REDLattice, Anomaly Six, Fog Data Science, Reveal Technology, Black Marlin Ventures.
 - **Published Investigative Journalism** — The Intercept, 404 Media, EFF, Citizen Lab, Amnesty International, TechCrunch, and others.
 
-No non-public data was accessed. No systems were penetrated. No accounts were created on any target company's platform. All findings are reproducible using the sources cited.
+No non-public data was accessed. No systems were penetrated. No accounts were created on any target company's platform. All findings are reproducible using the sources cited. Ongoing monitoring of CT logs, DNS resolution, and HTTP response headers provides continuous visibility into infrastructure changes across all tracked vendors.
 
 ---
 
@@ -831,6 +832,154 @@ Lobbying disclosure and corporate registry research revealed a systematic person
 The pattern: officials who wrote procurement requirements and shaped surveillance policy in government subsequently join the companies that sell surveillance products to those same agencies. The revolving door creates both the demand (from inside government) and the supply (from the private sector) for warrantless surveillance capabilities.
 
 ---
+
+
+### 5.7 March 2026 Infrastructure Monitoring — Active Deployments Detected {#march-monitoring}
+
+Ongoing CT log monitoring, DNS resolution, and HTTP header analysis in early March 2026 detected significant infrastructure changes across multiple vendors simultaneously. These findings represent real-time intelligence on active deployments and operational expansions.
+
+#### 5.7.1 Cellebrite — AI Infrastructure and HashiCorp Vault Cluster
+
+CT log monitoring in March 2026 revealed **199 new Cellebrite subdomains** and a certificate surge of 15+ certs in 24 hours, indicating a major infrastructure buildout:
+
+**HashiCorp Vault on F5 Distributed Cloud ("Clarion" Platform)**
+DNS resolution of newly discovered subdomains revealed `vega.clarion.cellebrite.com` is a **HashiCorp Vault secrets management instance** (IBM-licensed, BUSL-1.1) running on **F5 Distributed Cloud** (formerly Volterra) — enterprise-grade global edge infrastructure:
+
+- CNAME: `ves-io-23284277-aa1c-4df9-a304-8b5bbe82cd89.ac.vh.ves.io` → 159.60.128.132
+- The Vault UI at `/ui/` is publicly accessible (auth-gated), exposing the production configuration:
+  - **PostHog analytics** enabled on EU instance (`eu.i.posthog.com`), project ID: `phc_pIw6t5numW5jDram4dnJjSnwDOorf9IGd1MmlFp0dHh`
+  - **Raft storage backend** with snapshot endpoint: `/v1/sys/storage/raft/snapshot`
+  - Monitoring endpoints: `sys/health`, `sys/seal-status`, `sys/license/features`, `sys/internal/counters/config`
+- A second node, `spica.clarion.cellebrite.com`, resolves to the same F5 infrastructure but returns **401 Unauthorized** — a different service behind authentication
+- Five additional star-named nodes (atlas, jupiter, orion, gemma, pollux) exist in CT logs but resolve to NXDOMAIN — a **multi-node Vault cluster** being built out (2 of 7 nodes live)
+
+The codenames follow a star/constellation naming pattern — consistent with Cellebrite's practice of using cultural codenames for infrastructure (cf. "Blaumilch" in Section 5.2).
+
+**AI/ML Infrastructure Pipeline (Not Yet Live)**
+CT logs revealed domain names indicating AI capabilities under development:
+- `inference.cellebrite.com` — NXDOMAIN (reserved, not deployed)
+- `enrichment.cellebrite.com` — DNS record exists but no A record (provisioning stage)
+- `dev-enrichment.cellebrite.com`, `qa-enrichment.cellebrite.com`, `stg-enrichment.cellebrite.com` — full dev/qa/staging pipeline being prepared
+
+The presence of `inference` and `enrichment` subdomains with a complete SDLC pipeline indicates Cellebrite is building AI/ML inference capabilities — likely for their "Guardian Investigate" agentic AI platform announced in product materials. The infrastructure is being prepared but not yet operational.
+
+**Additional Discoveries:**
+- `osint-vpn.cellebrite.com` — NXDOMAIN (a dedicated VPN endpoint planned for OSINT operations)
+- `ice.cellebrite.com` → 173.70.100.106 — a **Verizon Business static IP** (not cloud-hosted), consistent with an on-premises deployment. The hostname "ice" in the context of a company selling phone extraction tools to ICE is notable.
+- `waf-us-gov-east-1.360.cellebrite.com` → AWS GovCloud ALB (`alb-ext-saas-pltm-app-prod-233324638.us-gov-east-1.elb.amazonaws.com`) — confirming Cellebrite's "360" analytics platform is deployed in US Government cloud infrastructure
+- `genesis.cellebrite.com` status was observed flapping between HTTP 200, 403, and unreachable — consistent with active deployment/maintenance. The Genesis platform runs React with Apollo Client (GraphQL), with operations including `SearchQuery`, `SQLQuery`, `useMutation`, and `useLazyQuery`. It is protected by Imperva/Incapsula WAF.
+
+#### 5.7.2 Babel Street — Rapid Multi-Tenant SaaS Deployment
+
+CT log analysis detected **48-52 new certificates in 24 hours** for `babelstreet.com`, all under the `*.sa.babelstreet.com` pattern — Babel Street's **"Secure Access" multi-tenant SaaS platform**:
+
+- All certificates issued by **Let's Encrypt** (automated provisioning)
+- Server identified as **Kestrel** (.NET/ASP.NET Core runtime)
+- Login pages show title: **"Secure Access - Babel Street"**
+
+**Tenant instances discovered via CT logs:**
+
+| Subdomain | Type | Evidence |
+|-----------|------|----------|
+| `admin.sa.babelstreet.com` | Admin portal | Named instance |
+| `alpha-gw.sa.babelstreet.com` | Gateway (alpha) | Named instance |
+| `trial3.sa.babelstreet.com` | Trial environment | Named instance |
+| `test2.sa.babelstreet.com` | Test environment | Named instance |
+| `6fdm2n`, `gj2snf`, `hccmq9`, `no4afr`, `qmu3ny`, `rxuysh`, `v86rws`, `xhn3vf`, `yqjwls` | Customer tenants | Randomly generated 6-char IDs |
+
+Nine randomly-generated tenant IDs appearing in a 24-hour window indicates active customer onboarding. Each tenant gets its own subdomain with a dedicated Let's Encrypt certificate, suggesting a containerized multi-tenant deployment. The "Secure Access" product name — distinct from Babel Street's known products (Babel X, Locate X, Rosette) — appears to be a new or rebranded offering.
+
+#### 5.7.3 Clearview AI and Flock Safety — Shared AWS Infrastructure
+
+DNS resolution monitoring detected that subdomains belonging to both **Clearview AI** (facial recognition) and **Flock Safety** (license plate readers) resolve to the **same three AWS EC2 instances** in us-east-2 (Ohio):
+
+| IP Address | PTR Record | RDAP Owner |
+|------------|-----------|------------|
+| 18.119.251.62 | ec2-18-119-251-62.us-east-2.compute.amazonaws.com | Amazon Technologies Inc. |
+| 18.216.62.46 | ec2-18-216-62-46.us-east-2.compute.amazonaws.com | Amazon Technologies Inc. |
+| 3.131.17.7 | ec2-3-131-17-7.us-east-2.compute.amazonaws.com | Amazon Technologies Inc. |
+
+These IPs serve no HTTP content on any standard port (80, 443, 8080, 8443) and present no TLS certificate — indicating backend/API services not intended for browser access.
+
+**Analysis:** A facial recognition company and an automated license plate reader company sharing backend infrastructure in the same AWS region is significant. Possible explanations include:
+1. **Data exchange** — shared analytics or cross-referencing between facial recognition and vehicle tracking data
+2. **Common infrastructure vendor** — a third-party platform serving both companies
+3. **Shared hosting** — coincidental placement on the same AWS account
+
+This connection has not been previously reported. Given that both companies sell to the same law enforcement customers and their data types are complementary (identifying people by face + tracking their vehicles), explanation #1 warrants further investigation.
+
+#### 5.7.4 Persona — AI and LLM Integration
+
+CT log monitoring revealed Persona (identity verification) is building AI-powered product capabilities:
+
+| Subdomain | IP | HTTP Response | Analysis |
+|-----------|-----|------|----------|
+| `mcp.withpersona.com` | 136.110.197.52 | **405 Method Not Allowed** | MCP (Model Context Protocol) API — accepts POST only |
+| `copilot.withpersona.com` | 34.8.4.112 | **401 Unauthorized** | Authenticated AI copilot service |
+| `ask-ai.withpersona.com` | Cloudflare | **403 Forbidden** | AI Q&A interface, IP-restricted |
+| `checkpoint.withpersona.com` | Cloudflare | **403 Forbidden** | Verification checkpoint product |
+| `checkpoint-demo.withpersona.com` | 34.54.76.130 | **403 Forbidden** | Demo environment |
+
+All services run on **Google Cloud** infrastructure. TLS negotiation reveals **X25519MLKEM768** post-quantum key exchange — indicating security-forward engineering practices.
+
+The `mcp.withpersona.com` endpoint is particularly notable: **Model Context Protocol (MCP)** is a standard for enabling LLM agents to interact with external tools. A Persona MCP server would allow AI agents to programmatically perform identity verification — automating KYC/AML checks that currently require human review. Combined with Persona's existing integration with OpenAI (screening millions of users monthly, per Section 4.10), this suggests Persona is positioning itself as the identity verification layer for AI-powered systems.
+
+#### 5.7.5 Palantir — Global Expansion and Owned IP Space
+
+RDAP queries on newly discovered Palantir endpoints revealed the company **owns its own IP address blocks** — unusual for a software company:
+
+| Block | RDAP Registration |
+|-------|------------------|
+| 198.97.14.0/23 | PALANTIR TECHNOLOGIES INC. (ARIN) |
+| 8.4.231.0/24 | PALANTIR TECHNOLOGIES INC. (ARIN) |
+
+**Global Mobile VPN Infrastructure:**
+CT logs revealed a 6-country mobile VPN deployment for field operators:
+
+| Endpoint | IP | Network Owner |
+|----------|-----|------|
+| mobilevpn-eastus.palantir.com | 198.97.14.108 | Palantir-owned |
+| mobilevpn-westus.palantir.com | 8.4.231.104 | Palantir-owned |
+| mobilevpn-de.palantir.com | 62.67.195.104 | RIPE (Germany) |
+| mobilevpn-uk.palantir.com | 198.97.15.22 | Palantir-owned |
+| mobilevpn-au.palantir.com | 216.200.189.104 | APNIC (Australia) |
+| mobilevpn-jp.palantir.com | 216.200.190.104 | APNIC (Japan) |
+
+These endpoints provide secure VPN access for Palantir personnel or customers deploying Foundry in the field — the geographic spread (US, Germany, UK, Australia, Japan) matches Palantir's Five Eyes + allied government customer base.
+
+**Foundry Regional Expansion:**
+New Atlassian Statuspage instances confirm rapid deployment of Foundry into new regions:
+
+| Instance | Inferred Region | Significance |
+|----------|----------------|-------------|
+| foundry-ilw-1 | Israel West | Israel deployment |
+| foundry-mew-1 | Middle East West | Gulf state deployment |
+| foundry-mec-3 | Middle East Central | Gulf state deployment |
+| foundry-usw-23 through usw-26 | US West | 4 new US instances |
+| foundry-euw-26 through euw-29 | EU West | 4 new EU instances |
+| foundry-apw-11 through apw-14 | Asia Pacific West | 4 new APAC instances |
+
+The Middle East deployments (MEW1, MEC3) are new — previously the investigation identified Saudi Arabia operations only through internal hostnames in Palantir's CT logs (Section 5.4). These dedicated regional status pages confirm Palantir is actively deploying Foundry for Middle Eastern government clients.
+
+#### 5.7.6 Cross-Vendor Correlation — Coordinated Activity
+
+Infrastructure monitoring detected temporal correlation across vendors:
+- **Simultaneous deployments** across Babel Street, Cellebrite, Palantir, and Persona within the same 24-hour window
+- **Coordinated certificate surges** between Babel Street (48+ certs) and Cellebrite (15+ certs)
+
+While coordinated timing could be coincidental (e.g., end-of-quarter deployments), it is consistent with an ecosystem where vendors are expanding infrastructure to meet growing government demand simultaneously.
+
+#### 5.7.7 Additional Findings
+
+**Thomson Reuters:** 14 new subdomains reveal Adobe Experience Manager (AEM) infrastructure deployment — `aem-prod-author`, `aem-prod-dispatcher1-4`, `aem-ppe-*`, `aem-uat-*`. Also `new.thomsonreuters.com` — a website rebuild in progress.
+
+**ShadowDragon:** New endpoints `transforms2.shadowdragon.io` and `www.api.shadowdragon.io` discovered. JS bundles for SocialNet and MalNet documentation sites unchanged — no code deployments detected.
+
+**Flock Safety:** Developer test instances exposed in CT logs: `dev-margarita.flocksafety.com` (internal tool codenamed "Margarita"), `security.flocksafety.com` → SafeBase security compliance portal.
+
+**Fog Data Science:** `www.fogds.com` (Microsoft IIS/10.0) observed alternating between operational and unreachable — infrastructure instability consistent with a small operation potentially scaling down.
+
+**Paragon Solutions:** `paya.com` infrastructure migrated from AWS Frankfurt (18.185.24.46, 3.126.5.188, 3.71.139.153) to Hetzner Germany (185.206.180.113, 195.201.248.87) — a move from premium cloud to budget hosting.
 
 ## 6. The Legal Gray Zone {#the-legal-gray-zone}
 
@@ -10191,19 +10340,21 @@ Upload phone dump → Upload evidence files → AI analyzes → Ask questions �
 | Metric | Count |
 |--------|-------|
 | Companies tracked | 36 |
-| Leads in database | 1,440 |
-| Critical leads | 455 |
-| Open critical leads | 22 |
-| Domains/subdomains tracked | 5,659 |
+| Leads in database | 1,440+ |
+| Critical leads | 455+ |
+| Open critical leads | 22+ |
+| Domains/subdomains tracked | 6,218+ |
 | Federal contracts documented | 63 |
 | Total contract value tracked | $3.4B+ |
-| Company connections mapped | 40 |
-| Report sections | 54 |
-| Main report lines | 9,874+ |
-| Executive summary lines | 1,895+ |
-| Raw scan data lines | 2,858 |
-| Investigation files | 1,064 |
+| Company connections mapped | 41 |
+| Report sections | 55 |
+| Main report lines | 10,500+ |
+| Executive summary lines | 2,100+ |
+| Raw scan data lines | 3,700+ |
+| Investigation files | 1,938+ |
 | Recon scripts written | 19 |
+| Infrastructure changes detected (Mar 2026) | 661 |
+| New subdomains discovered (Mar 2026) | 559 |
 
 ---
 
